@@ -7,7 +7,7 @@ If you are coming from AWS space, you might be aware of projects like [Zalando's
 
 In this article, I walk you through the process of setting up  Azure Access Directory Pod Identities inside your cluster. The article is split into 4 parts
 
- - Problem we want to solve
+ - The problem we want to solve
  - Concepts behind AAD Pod Identity
  - Security
  - Deployment steps
@@ -43,9 +43,9 @@ Let's say a pod with an application X needs to have read access to data inside a
     )
     ```
 
-Each of these options requires us to have a certain value like the token above, or environmental variables set on the target machine. Those values could be defined inside the container image, injected as a K8S secret, or maybe set as env variable in the deployment YAML. For a token, we need to make sure we rotate it regularly; env variables need to be delivered to a target pod. 
+Each of these options requires us to have a certain value like the token above, or environmental variables set on the target machine. Those values could be defined inside the container image, injected as a K8S secret, or maybe set as env variable in the deployment YAML. For a token, we need to make sure we rotate it regularly; env variables need to be delivered to target pod. 
 
-Ideally, we would like to get rid of this requirement and use something that streamline the whole process. We want to:
+Ideally, we would like to get rid of this requirement and use something that streamlines the whole process. We want to:
 
  - make sure our application access only necessary resources
  - apply none or minimal code changes to our application
@@ -59,7 +59,7 @@ Ideally, we would like to get rid of this requirement and use something that str
 
 #### Managed identities 
 
-Managed identity allows  authenticating to any service that supports Azure AD authentication without attaching credentials to your application. Once the identity is created, you need to attach a role that defines what the identity can do with a particular resource.
+Managed identity allows authenticating to any service that supports Azure AD authentication without attaching credentials to your application. Once the identity is created, you need to attach a role that defines what the identity can do with a particular resource.
 
 Let's have a look at the sample code:
 
@@ -106,7 +106,7 @@ Before we deploy anything, it is vital to understand the security risks behind i
 #### Reusing selector binding
 
 ![](./AAD_Rogue.png)
-MIC identifies pods by `aadpodidbinding` label. If any other pod in the cluster reuses `aadpodidbinding` it also access to the associated identity binding. For a cluster with a single project, it's unlikely to happen, but still, you need to be cautious, especially if the cluster is logically shared across teams/projects.
+MIC identifies pods by `aadpodidbinding` label. If any other pod in the cluster reuses `aadpodidbinding` it also accesses to the associated identity binding. For a cluster with a single project, it's unlikely to happen, but still, you need to be cautious, especially if the cluster is logically shared across teams/projects.
 
 By default, AAD Pod Identity maps pods with identities across namespaces. If the cluster is shared, it is crucial to deploy AAD Pod Identities, [forcing namespace matching](https://github.com/Azure/aad-pod-identity/blob/master/docs/readmes/README.namespaced.md).
 
@@ -146,7 +146,7 @@ az identity create -g "<your_resource_group>" -n "<your_managed_identity_name>"
 ```
 
 The command should return the following:
-```
+```json
 {
   "clientId": "00000000-0000-0000-0000-000000000000",
   "clientSecretUrl": "https://control-westeurope.identity.azure.net/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/<your_resource_group>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/<your_managed_identity_name>/credentials?tid=00000000-0000-0000-0000-000000000000&oid=00000000-0000-0000-0000-000000000000&aid=00000000-0000-0000-0000-000000000000",
