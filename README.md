@@ -1,11 +1,11 @@
 # The right way of accessing Azure services from inside your Azure Kubernetes Cluster
 
-Often applications running on Azure need to access other Azure resources, like storage accounts, CosmosDB or, KeyVault instances. When it seems like an easy task using [managed identites](https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview), it gets a little bit more complicated in the context of the AKS cluster. Nodes are shared across different pods, and we need to keep fine-grained access policies at the pod level rather than the node level.
+Often applications running on Azure need to access other Azure resources, like storage accounts, CosmosDB or, KeyVault instances. When it seems like an easy task using [managed identities](https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview), it gets a little bit more complicated in the context of the AKS cluster. Nodes are shared across different pods, and we need to keep fine-grained access policies at the pod level rather than the node level.
 
 
 If you are coming from AWS space, you might be aware of projects like [Zalando's IAM controller for K8S](https://github.com/zalando-incubator/kube-aws-iam-controller) or [kiam](https://github.com/uswitch/kiam). Azure has [AAD Pod Identity](https://github.com/Azure/aad-pod-identity/) which, you can consider equivalent to the projects mentioned above.
 
-In this article, I walk you through the process of setting up  Azure Access Directory Pod Identities inside your cluster. The article is split into 4 parts
+In this article, I walk you through the process of setting up  Azure Access Directory Pod Identities inside your cluster. The article is split into four parts
 
  - The problem we want to solve
  - Concepts behind AAD Pod Identity
@@ -16,12 +16,14 @@ In this article, I walk you through the process of setting up  Azure Access Dire
 ## Problem
 
 Let's say a pod with an application X needs to have read access to data inside a blob storage container. There are several ways of achieving this, examples are:
- -  `DefaultAzureCredential`
+ -  `EnvironmentCredential`
 
-    Will read environment variables and then authenticate as a service principal, user, or a managed identity. 
+    Will read environment variables and then authenticate as a service principal or a user.
 
     ```python
-    credential = DefaultAzureCredential()
+    from azure.identity import EnvironmentCredential
+
+    credential = EnvironmentCredential()
     client = BlobServiceClient(account_url, credential=credential)
     ```
 
@@ -69,7 +71,7 @@ from azure.identity import ManagedIdentityCredential
 credential = ManagedIdentityCredential()
 client = BlobServiceClient(account_url, credential=credential)
 ```
-It looks almost like the `DefaultAzureCredential` example above, but there is one subtle difference. `ManagedIdentityCredential` creates an access token in real-time without any additional data attached to your app as opposed to `DefaultAzureCredential` that requires you to set env variables with secrets.
+It looks almost like the `EnvironmentCredential` example above, but there is one subtle difference. `ManagedIdentityCredential` creates an access token in real-time without any additional data attached to your app as opposed to `EnvironmentCredential` that requires you to set env variables with secrets.
 
 #### AAD Pod Identity
 
@@ -101,8 +103,7 @@ When you deploy AAD Pod Identity to your cluster, you get two components:
 
 ## Security
 
-Before we deploy anything, it is vital to understand the security risks behind it.
-
+Before we deploy anything, it is vital to understand the potential security risks behind it.
 #### Reusing selector binding
 
 ![](./AAD_Rogue.png)
@@ -247,7 +248,7 @@ spec:
 
 Congratulations, you are ready to use your managed identities with apps running inside your AKS cluster. 
 
-I hope you find it useful. Let me know if you have any questions or like to hear about some other topics.
+I hope you find this useful. Let me know if you have any questions or like to hear about some other topics.
 
 
 
