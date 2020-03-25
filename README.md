@@ -1,5 +1,7 @@
 # The right way of accessing Azure services from inside your Azure Kubernetes Cluster
 
+> The article has been also published at [ITNext.io](https://itnext.io/the-right-way-of-accessing-azure-services-from-inside-your-azure-kubernetes-cluster-14a335767680)
+
 Often applications running on Azure need to access other Azure resources, like storage accounts, CosmosDB or, KeyVault instances. When it seems like an easy task using [managed identities](https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview), it gets a little bit more complicated in the context of the AKS cluster. Nodes are shared across different pods, and we need to keep fine-grained access policies at the pod level rather than the node level.
 
 
